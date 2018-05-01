@@ -8,7 +8,7 @@ import 'rxjs/add/observable/throw';
 @Injectable()
 export class ApiService {
 
-  api: String =  'http://menagosnotes.azurewebsites.net/api';
+  api: String =  'http://project635noteapi.azurewebsites.net/api';
   options;
   constructor(
     private http: Http

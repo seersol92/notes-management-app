@@ -5,6 +5,8 @@ import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-boots
 import { User } from './entities/user';
 import { Note } from './entities/note';
 import { Category } from './entities/category';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-root',
@@ -38,18 +40,26 @@ export class AppComponent implements OnInit {
     private api: ApiService,
     private modalService: NgbModal
   ) {
-     this.api.getRequest('/users').subscribe(res => {
-       this.users = res;
-       console.log(this.users);
-     });
-     this.api.getRequest('/notes').subscribe(res => {
+    this.fetchCategories();
+    this.fetchNotes();
+    this.fetchUsers();
+  }
+
+  fetchNotes () {
+    this.api.getRequest('/notes').subscribe(res => {
       this.notes = res;
-      console.log(this.notes);
     });
+  }
+
+  fetchUsers() {
+    this.api.getRequest('/users').subscribe(res => {
+      this.users = res;
+    });
+  }
+
+  fetchCategories() {
     this.api.getRequest('/categories').subscribe(res => {
       this.categories = res;
-      console.log(this.categories);
-
     });
   }
 
@@ -59,7 +69,14 @@ export class AppComponent implements OnInit {
      this.category = new Category();
   }
 
+  hideMessage(): void {
+    setTimeout(() => {
+      this.messageClass = '';
+      this.message = '';
+    }, 10000);
+  }
   noteModal(content): void {
+    this.note = new Note();
     this.noteModalText = 'Add New Note';
     this.noteModalBtn = 'Submit';
     this.modalRef =  this.modalService.open(content);
@@ -76,6 +93,7 @@ export class AppComponent implements OnInit {
       this.api.postRequest('/notes', data).subscribe(res => {
         this.modalRef.close();
         if (res) {
+          this.fetchNotes();
           this.notes.push(data);
           this.messageClass = 'alert alert-success';
           this.message = 'Note Has Been Added!';
@@ -86,11 +104,13 @@ export class AppComponent implements OnInit {
       });
     } else { // update user
       this.api.updateRequest('/notes/' + this.noteId, data).subscribe(res => {
-        this.modalRef.close();
+          this.modalRef.close();
+          this.fetchNotes();
           this.messageClass = 'alert alert-success';
           this.message = 'Note Has Been Updated!';
       });
     }
+    this.hideMessage();
   }
 
   editNote (index: number, id: number, content) {
@@ -126,9 +146,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-
-
   userModal(content) {
+    this.user = new User();
     this.userModelText = 'Add New User';
     this.userModelBtn = 'Submit';
     this.modalRef =  this.modalService.open(content);
@@ -146,6 +165,7 @@ export class AppComponent implements OnInit {
         this.modalRef.close();
         if (res) {
           this.users.push(data);
+          this.fetchUsers();
           this.messageClass = 'alert alert-success';
           this.message = 'User Has Been Added!';
         } else {
@@ -155,11 +175,13 @@ export class AppComponent implements OnInit {
       });
     } else { // update user
       this.api.updateRequest('/users/' + this.userId, data).subscribe(res => {
-        this.modalRef.close();
+          this.modalRef.close();
+          this.fetchUsers();
           this.messageClass = 'alert alert-success';
           this.message = 'User Has Been Updated!';
       });
     }
+    this.hideMessage();
   }
 
   editUser (index: number, id: number, content) {
@@ -197,6 +219,7 @@ export class AppComponent implements OnInit {
 
 
   categoryModal(content): void {
+    this.category = new Category();
     this.categoryModalText = 'Add New Category';
     this.categoryModalBtn = 'Submit';
     this.modalRef =  this.modalService.open(content);
@@ -246,6 +269,7 @@ export class AppComponent implements OnInit {
       this.api.postRequest('/categories', data).subscribe(res => {
         this.modalRef.close();
         if (res) {
+          this.fetchCategories();
           this.categories.push(data);
           this.messageClass = 'alert alert-success';
           this.message = 'Category Has Been Added!';
@@ -256,11 +280,13 @@ export class AppComponent implements OnInit {
       });
     } else { // update user
       this.api.updateRequest('/categories/' + this.categoryId, data).subscribe(res => {
-        this.modalRef.close();
+          this.modalRef.close();
+          this.fetchCategories();
           this.messageClass = 'alert alert-success';
           this.message = 'Category Has Been Updated!';
       });
     }
+    this.hideMessage();
   }
 
   private getDismissReason(reason: any): string {
